@@ -12,10 +12,10 @@ provider "aws" {
   profile = "default"
 }
 
-# Get Knowledge Base ID
-data "aws_bedrock_knowledge_bases" "aje_kb" {
-  name_contains = "aje"
-}
+# Remove unsupported data source
+# data "aws_bedrock_knowledge_bases" "aje_kb" {
+#   name_contains = "aje"
+# }
 
 # IAM Role for Lambda
 resource "aws_iam_role" "lambda_role" {
@@ -172,10 +172,10 @@ resource "aws_api_gateway_method_response" "options_response" {
   http_method = aws_api_gateway_method.options_method.http_method
   status_code = "200"
 
-  response_headers = {
-    "Access-Control-Allow-Headers" = true
-    "Access-Control-Allow-Methods" = true
-    "Access-Control-Allow-Origin"  = true
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Origin"  = true
   }
 }
 
@@ -186,11 +186,18 @@ resource "aws_api_gateway_integration_response" "options_integration_response" {
   http_method = aws_api_gateway_method.options_method.http_method
   status_code = aws_api_gateway_method_response.options_response.status_code
 
-  response_headers = {
-    "Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-    "Access-Control-Allow-Methods" = "'POST,OPTIONS'"
-    "Access-Control-Allow-Origin"  = "'*'"
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Methods" = "'POST,OPTIONS'"
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
   }
+}
+
+# API Gateway Stage
+resource "aws_api_gateway_stage" "prod" {
+  deployment_id = aws_api_gateway_deployment.bedrock_deployment.id
+  rest_api_id   = aws_api_gateway_rest_api.bedrock_api.id
+  stage_name    = "prod"
 }
 
 # API Gateway Deployment
@@ -201,5 +208,16 @@ resource "aws_api_gateway_deployment" "bedrock_deployment" {
   ]
 
   rest_api_id = aws_api_gateway_rest_api.bedrock_api.id
-  stage_name  = "prod"
+
+  triggers = {
+    redeployment = sha1(jsonencode([
+      aws_api_gateway_resource.query_resource.id,
+      aws_api_gateway_method.query_method.id,
+      aws_api_gateway_integration.lambda_integration.id,
+    ]))
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
