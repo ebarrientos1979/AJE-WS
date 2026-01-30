@@ -136,6 +136,32 @@ resource "aws_api_gateway_integration" "lambda_integration" {
   uri                    = aws_lambda_function.bedrock_rag.invoke_arn
 }
 
+# API Gateway Method Response for POST
+resource "aws_api_gateway_method_response" "query_response" {
+  rest_api_id = aws_api_gateway_rest_api.bedrock_api.id
+  resource_id = aws_api_gateway_resource.query_resource.id
+  http_method = aws_api_gateway_method.query_method.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = true
+  }
+}
+
+# API Gateway Integration Response for POST
+resource "aws_api_gateway_integration_response" "query_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.bedrock_api.id
+  resource_id = aws_api_gateway_resource.query_resource.id
+  http_method = aws_api_gateway_method.query_method.http_method
+  status_code = aws_api_gateway_method_response.query_response.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = "'*'"
+  }
+
+  depends_on = [aws_api_gateway_integration.lambda_integration]
+}
+
 # Lambda Permission for API Gateway
 resource "aws_lambda_permission" "api_gateway_lambda" {
   statement_id  = "AllowExecutionFromAPIGateway"

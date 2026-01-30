@@ -1,14 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Deploying AJE Delivery Angular App to S3..."
-
-# Install dependencies
-echo "📦 Installing dependencies..."
-npm install
-
-# Build Angular app
-echo "🔨 Building Angular application..."
-npm run build:prod
+echo "🚀 Deploying AJE Delivery HTML App to S3..."
 
 # Create S3 infrastructure
 echo "🏗️  Creating S3 infrastructure..."
@@ -21,7 +13,9 @@ echo "📦 S3 Bucket: $BUCKET_NAME"
 
 # Upload files to S3
 echo "📤 Uploading files to S3..."
-aws s3 sync dist/aje-delivery-assistant/ s3://$BUCKET_NAME --delete --profile default
+aws s3 cp index.html s3://$BUCKET_NAME/index.html --profile default
+aws s3 cp app.js s3://$BUCKET_NAME/app.js --profile default
+aws s3 cp config.json s3://$BUCKET_NAME/config.json --profile default
 
 # Get website URL
 WEBSITE_URL=$(terraform output -raw website_url)

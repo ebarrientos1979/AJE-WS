@@ -1,48 +1,49 @@
-# Lab 4: Angular Frontend
+# Lab 4: HTML Frontend
 
 ## 🎯 Objetivo
-Crear una aplicación Angular con interfaz de chat que se conecte al API Gateway del Lab 3 y se despliegue en S3 como sitio web estático.
+Crear una aplicación web HTML pura con Bootstrap que se conecte al API Gateway del Lab 3 y se despliegue en S3 como sitio web estático.
 
 ## 🏗️ Arquitectura
-- **Angular App**: Interfaz web moderna y responsive
+- **HTML + Bootstrap**: Interfaz moderna sin frameworks
+- **JavaScript + AJAX**: Comunicación con API Gateway
 - **S3 Static Website**: Hosting simple y económico
-- **Config JSON**: URL del API Gateway configurable sin recompilar
+- **Config JSON**: URL del API Gateway configurable
 
 ## 📋 Prerequisitos
-- Node.js 18+ y npm
-- Angular CLI: `npm install -g @angular/cli`
 - AWS CLI configurado con profile `default`
 - Terraform instalado
 - Lab 3 desplegado (API Gateway funcionando)
+- **¡No necesitas Node.js ni npm!**
 
 ## 🚀 Despliegue
 
-### Despliegue automático:
+### En Windows PowerShell:
+```powershell
+.\deploy.ps1
+```
+
+### En Linux/Mac:
 ```bash
 ./deploy.sh
 ```
 
 ### Despliegue manual:
 ```bash
-# 1. Instalar dependencias
-npm install
-
-# 2. Construir aplicación
-npm run build:prod
-
-# 3. Crear infraestructura S3
+# 1. Crear infraestructura S3
 terraform init
 terraform apply
 
-# 4. Subir archivos
+# 2. Subir archivos
 BUCKET_NAME=$(terraform output -raw bucket_name)
-aws s3 sync dist/aje-delivery-assistant/ s3://$BUCKET_NAME --delete --profile default
+aws s3 cp index.html s3://$BUCKET_NAME/index.html --profile default
+aws s3 cp app.js s3://$BUCKET_NAME/app.js --profile default
+aws s3 cp config.json s3://$BUCKET_NAME/config.json --profile default
 ```
 
 ## ⚙️ Configuración
 
 ### Cambiar URL del API Gateway:
-Edita `src/config.json`:
+Edita `config.json`:
 ```json
 {
   "apiGatewayUrl": "https://tu-nueva-url.execute-api.us-east-1.amazonaws.com/prod/query"
@@ -51,54 +52,43 @@ Edita `src/config.json`:
 
 Luego sube solo el archivo de configuración:
 ```bash
-aws s3 cp src/config.json s3://bucket-name/config.json --profile default
+aws s3 cp config.json s3://bucket-name/config.json --profile default
 ```
 
-**¡No necesitas recompilar Angular!**
+**¡No necesitas recompilar nada!**
 
 ## 🎨 Características de la UI
 
-### Interfaz Moderna:
-- 💬 Chat conversacional en tiempo real
-- 🎨 Diseño gradient moderno
-- 📱 Responsive (desktop y móvil)
-- ⚡ Carga rápida y optimizada
+### Tecnologías:
+- **Bootstrap 5.3**: Framework CSS moderno
+- **Font Awesome**: Iconos vectoriales
+- **Google Fonts**: Tipografía Inter
+- **Vanilla JavaScript**: Sin dependencias
 
 ### Funcionalidades:
-- **Sugerencias iniciales**: Preguntas predefinidas
-- **Historial de chat**: Mantiene conversación
-- **Indicadores visuales**: Loading spinners
-- **Manejo de errores**: Mensajes informativos
-- **Fuentes de información**: Muestra documentos utilizados
+- 💬 **Chat en tiempo real**: Interfaz conversacional
+- 🎨 **Diseño responsive**: Desktop y móvil
+- 🚀 **Sugerencias rápidas**: Botones predefinidos
+- ⚡ **Loading states**: Indicadores visuales
+- 📚 **Fuentes de información**: Muestra documentos
+- 🔄 **Manejo de errores**: Mensajes informativos
 
 ### Ejemplos de Preguntas:
-- "¿Qué productos de abarrotes tienen disponibles?"
-- "¿Cuáles son los precios de los productos?"
-- "¿Cómo funciona el servicio de delivery?"
-- "¿Cómo puedo hacer un pedido?"
+- 🛒 "¿Qué productos de abarrotes tienen disponibles?"
+- 💰 "¿Cuáles son los precios de los productos?"
+- 🚚 "¿Cómo funciona el servicio de delivery?"
+- 📝 "¿Cómo puedo hacer un pedido?"
 
-## 🔧 Desarrollo Local
-
-```bash
-# Instalar dependencias
-npm install
-
-# Servidor de desarrollo
-npm start
-
-# La app estará en http://localhost:4200
-```
-
-## 📊 Estructura del Proyecto
+## 📁 Estructura del Proyecto
 
 ```
-src/
-├── app/
-│   └── app.component.ts    # Componente principal con lógica de chat
-├── config.json             # Configuración del API Gateway
-├── index.html              # HTML principal
-├── main.ts                 # Bootstrap de Angular
-└── styles.css              # Estilos globales
+├── index.html          # Página principal con Bootstrap
+├── app.js             # JavaScript con AJAX
+├── config.json        # Configuración del API Gateway
+├── main.tf           # Infraestructura S3
+├── outputs.tf        # Outputs de Terraform
+├── deploy.sh         # Script Linux/Mac
+└── deploy.ps1        # Script PowerShell
 ```
 
 ## 💰 Costos
@@ -108,7 +98,7 @@ src/
 - **Requests**: ~$0.0004/1000 requests
 - **Transferencia**: ~$0.09/GB
 
-**Costo estimado mensual**: < $1 USD para una demo
+**Costo estimado mensual**: < $1 USD
 
 ## 🔍 Troubleshooting
 
@@ -118,8 +108,8 @@ src/
 
 ### App no carga:
 ```bash
-# Verificar bucket policy
-aws s3api get-bucket-policy --bucket bucket-name --profile default
+# Verificar archivos en S3
+aws s3 ls s3://bucket-name --profile default
 
 # Verificar website configuration
 aws s3api get-bucket-website --bucket bucket-name --profile default
@@ -128,7 +118,7 @@ aws s3api get-bucket-website --bucket bucket-name --profile default
 ### Actualizar solo configuración:
 ```bash
 # Cambiar URL en config.json y subir
-aws s3 cp src/config.json s3://bucket-name/config.json --profile default
+aws s3 cp config.json s3://bucket-name/config.json --profile default
 ```
 
 ## 🧹 Limpieza
@@ -136,17 +126,7 @@ aws s3 cp src/config.json s3://bucket-name/config.json --profile default
 ```bash
 # Eliminar recursos AWS
 terraform destroy
-
-# Limpiar node_modules
-rm -rf node_modules dist
 ```
-
-## 📁 Archivos Clave
-
-- `src/config.json` - **URL del API Gateway (configurable)**
-- `src/app/app.component.ts` - Lógica principal del chat
-- `main.tf` - Infraestructura S3
-- `deploy.sh` - Script de despliegue automático
 
 ## 🌐 URL Final
 
@@ -155,4 +135,12 @@ Después del despliegue:
 http://aje-delivery-assistant-xxxxxxxx.s3-website-us-east-1.amazonaws.com
 ```
 
-**¡Interfaz moderna, económica y fácil de mantener!**
+## ✅ Ventajas de HTML Puro
+
+- 🚀 **Sin compilación**: Deploy inmediato
+- 📦 **Sin dependencias**: No npm, no Node.js
+- ⚡ **Carga rápida**: Archivos estáticos optimizados
+- 🔧 **Fácil mantenimiento**: HTML/CSS/JS estándar
+- 💰 **Súper económico**: Solo S3 hosting
+
+**¡Interfaz moderna y funcional sin complicaciones!**
