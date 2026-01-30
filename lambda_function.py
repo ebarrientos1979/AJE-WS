@@ -42,8 +42,8 @@ def lambda_handler(event, context):
             retrieveAndGenerateConfiguration={
                 'type': 'KNOWLEDGE_BASE',
                 'knowledgeBaseConfiguration': {
-                    'knowledgeBaseId': 'aje_conocimiento',  # This will be replaced with actual ID
-                    'modelArn': 'arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-5-sonnet-20241022-v2:0'
+                    'knowledgeBaseId': 'BO2ZUTK4JD',  # ID real del Knowledge Base aje_conocimiento
+                    'modelArn': 'arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0'
                 }
             }
         )

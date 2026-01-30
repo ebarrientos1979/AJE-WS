@@ -59,7 +59,7 @@ resource "aws_iam_role_policy" "lambda_policy" {
           "bedrock:InvokeModelWithResponseStream"
         ]
         Resource = [
-          "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-5-sonnet-20241022-v2:0"
+          "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0"
         ]
       },
       {
@@ -95,7 +95,7 @@ resource "aws_lambda_function" "bedrock_rag" {
 
   environment {
     variables = {
-      KNOWLEDGE_BASE_ID = "aje_conocimiento"
+      KNOWLEDGE_BASE_ID = "BO2ZUTK4JD"
     }
   }
 }
